@@ -1,124 +1,152 @@
-export default function Home(){
+export default function Home() {
 
-return(
+return (
 
-<div className="container">
+<div className="main">
 
-{/* HERO */}
-
-<div className="card" style={{textAlign:"center"}}>
-
-<h1 className="title">
-Mzazi Tech Bot Hosting
-</h1>
-
-<p style={{marginTop:"10px"}}>
-Connect your WhatsApp bot instantly using pairing code.  
-Fast, secure and reliable hosting.
-</p>
-
-<a href="/connect" className="linkbtn">
-Connect Your Bot
-</a>
-
-</div>
+<header className="navbar">
+<h2>Mzazi Tech</h2>
+<a href="/connect" className="navbtn">Connect Bot</a>
+</header>
 
 
-{/* FEATURES */}
+<section className="hero">
 
-<div style={{marginTop:"40px"}}>
-
-<h2 style={{marginBottom:"20px"}}>
-Features
-</h2>
-
-<div style={{
-display:"grid",
-gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",
-gap:"20px"
-}}>
-
-<div className="card">
-
-<h3>⚡ Fast Connection</h3>
-
-<p style={{marginTop:"10px"}}>
-Connect your WhatsApp bot instantly using pairing code system.
-</p>
-
-</div>
-
-<div className="card">
-
-<h3>🤖 Multi Bot</h3>
-
-<p style={{marginTop:"10px"}}>
-Run multiple WhatsApp bots simultaneously with stable sessions.
-</p>
-
-</div>
-
-<div className="card">
-
-<h3>🔒 Secure</h3>
-
-<p style={{marginTop:"10px"}}>
-All sessions are securely stored and protected.
-</p>
-
-</div>
-
-<div className="card">
-
-<h3>🌐 Web Dashboard</h3>
-
-<p style={{marginTop:"10px"}}>
-Manage and monitor your bot directly from the website.
-</p>
-
-</div>
-
-</div>
-
-</div>
-
-
-{/* COMMUNITY */}
-
-<div className="card" style={{marginTop:"40px",textAlign:"center"}}>
-
-<h2>Join Our Community</h2>
-
-<p style={{marginTop:"10px"}}>
-Stay updated with the latest features and updates.
-</p>
-
-<a
-href="https://chat.whatsapp.com/C8pzXYhMJMyKbHMdehT9Yt"
-className="linkbtn"
-style={{marginTop:"20px"}}
->
-
-Join WhatsApp Group
-
-</a>
-
-</div>
-
-
-{/* FOOTER */}
-
-<div style={{
-marginTop:"40px",
-textAlign:"center",
-opacity:"0.6"
-}}>
+<h1>WhatsApp Bot Hosting</h1>
 
 <p>
-© 2026 Mzazi Tech Inc
+Connect your WhatsApp bot instantly using pairing code.
+Simple, fast and secure.
 </p>
 
+<a href="/connect" className="connectbtn">
+Start Connecting
+</a>
+
+</section>
+
+
+<section className="features">
+
+<div className="card">
+<h3>⚡ Fast</h3>
+<p>Instant bot connection using pairing code.</p>
 </div>
+
+<div className="card">
+<h3>🤖 Multi Bot</h3>
+<p>Run multiple bots without problems.</p>
+</div>
+
+<div className="card">
+<h3>🔒 Secure</h3>
+<p>Sessions stored safely on server.</p>
+</div>
+
+<div className="card">
+<h3>🌐 Dashboard</h3>
+<p>Manage bots easily through website.</p>
+</div>
+
+</section>
+
+
+<footer className="footer">
+
+<p>© 2026 Mzazi Tech Inc</p>
+
+</footer>
+
+
+
+<style jsx>{`
+
+.main{
+background:#0b0b0b;
+color:white;
+min-height:100vh;
+font-family:Arial, Helvetica, sans-serif;
+}
+
+
+/* NAVBAR */
+
+.navbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 40px;
+border-bottom:1px solid #222;
+}
+
+.navbtn{
+background:#00eaff;
+padding:10px 18px;
+color:black;
+text-decoration:none;
+border-radius:6px;
+font-weight:bold;
+}
+
+
+/* HERO */
+
+.hero{
+text-align:center;
+padding:100px 20px;
+}
+
+.hero h1{
+font-size:50px;
+margin-bottom:20px;
+}
+
+.hero p{
+opacity:0.7;
+margin-bottom:30px;
+}
+
+.connectbtn{
+background:#00eaff;
+padding:14px 28px;
+color:black;
+text-decoration:none;
+border-radius:8px;
+font-weight:bold;
+}
+
+
+/* FEATURES */
+
+.features{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+padding:40px;
+}
+
+.card{
+background:#111;
+padding:25px;
+border-radius:10px;
+border:1px solid #222;
+}
+
+.card h3{
+margin-bottom:10px;
+}
+
+
+/* FOOTER */
+
+.footer{
+text-align:center;
+padding:30px;
+border-top:1px solid #222;
+opacity:0.6;
+}
+
+`}</style>
 
 
 </div>
