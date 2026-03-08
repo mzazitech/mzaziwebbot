@@ -1,5 +1,4 @@
 const socket = io();
-let currentSessionId = null;
 
 // DOM Elements
 const phoneInput = document.getElementById('phoneNumber');
@@ -14,65 +13,68 @@ const successSection = document.getElementById('successSection');
 const errorSection = document.getElementById('errorSection');
 const errorText = document.getElementById('errorText');
 
-// Socket event handlers
+let currentSessionId = null;
+
+// Socket connection check
 socket.on('connect', () => {
-    console.log('Connected to server');
+    console.log('✅ Connected to server');
+    statusText.textContent = 'Connected to server';
+});
+
+socket.on('connect_error', (error) => {
+    console.error('❌ Socket connection error:', error);
+    statusText.textContent = 'Server connection failed';
+    alert('Cannot connect to server. Make sure the server is running.');
+});
+
+socket.on('status', (data) => {
+    console.log('Status:', data.message);
+    statusText.textContent = data.message;
 });
 
 socket.on('pairing-code', (data) => {
-    // Hide QR if showing
-    qrSection.style.display = 'none';
+    console.log('Pairing code received:', data);
+    currentSessionId = data.sessionId;
     
-    // Show pairing code
+    qrSection.style.display = 'none';
     pairingCodeSection.style.display = 'block';
     pairingCodeDisplay.textContent = data.formattedCode || data.code;
-    statusText.textContent = 'Pairing code generated!';
     
-    // Stop spinner
     document.querySelector('.spinner').style.display = 'none';
 });
 
 socket.on('qr-code', (data) => {
-    // Hide pairing code if showing
-    pairingCodeSection.style.display = 'none';
+    console.log('QR code received');
+    currentSessionId = data.sessionId;
     
-    // Show QR code
+    pairingCodeSection.style.display = 'none';
     qrSection.style.display = 'block';
     qrImage.src = data.qr;
-    statusText.textContent = 'Scan QR code with WhatsApp';
     
-    // Stop spinner
     document.querySelector('.spinner').style.display = 'none';
 });
 
 socket.on('connected', (data) => {
-    // Hide all intermediate sections
+    console.log('Connected successfully');
+    currentSessionId = data.sessionId;
+    
     pairingCodeSection.style.display = 'none';
     qrSection.style.display = 'none';
-    
-    // Show success
     successSection.style.display = 'block';
-    statusText.textContent = 'Connected!';
-    document.querySelector('.spinner').style.display = 'none';
     
-    // Disable start button
+    document.querySelector('.spinner').style.display = 'none';
     startBtn.disabled = true;
-    startBtn.style.opacity = '0.5';
 });
 
 socket.on('error', (data) => {
+    console.error('Error:', data.message);
     errorSection.style.display = 'block';
     errorText.textContent = data.message;
-    statusText.textContent = 'Error occurred';
+    
     document.querySelector('.spinner').style.display = 'none';
 });
 
-socket.on('logged-out', (data) => {
-    resetForm();
-    alert('Session logged out from WhatsApp');
-});
-
-// Start connection
+// Start button click handler
 startBtn.addEventListener('click', async () => {
     const phoneNumber = phoneInput.value.trim();
     
@@ -81,19 +83,17 @@ startBtn.addEventListener('click', async () => {
         return;
     }
     
-    // Validate phone number (basic check)
     if (!/^\d{10,15}$/.test(phoneNumber)) {
         alert('Please enter a valid phone number (10-15 digits)');
         return;
     }
     
-    // Generate a session ID
-    currentSessionId = `session_${Date.now()}`;
+    console.log('Starting pairing for:', phoneNumber);
     
     // Show status section
     statusSection.style.display = 'block';
     
-    // Reset displays
+    // Hide all result sections
     pairingCodeSection.style.display = 'none';
     qrSection.style.display = 'none';
     successSection.style.display = 'none';
@@ -101,7 +101,7 @@ startBtn.addEventListener('click', async () => {
     
     // Show spinner
     document.querySelector('.spinner').style.display = 'block';
-    statusText.textContent = 'Connecting to WhatsApp...';
+    statusText.textContent = 'Starting connection...';
     
     try {
         const response = await fetch('/api/start-pairing', {
@@ -109,30 +109,28 @@ startBtn.addEventListener('click', async () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                phoneNumber: phoneNumber,
-                sessionId: currentSessionId
-            })
+            body: JSON.stringify({ phoneNumber })
         });
         
         const data = await response.json();
+        console.log('Server response:', data);
         
         if (!data.success) {
-            throw new Error(data.error || 'Failed to start pairing');
+            throw new Error(data.error || 'Failed to start');
         }
         
-        console.log('Session started:', data);
+        currentSessionId = data.sessionId;
+        statusText.textContent = 'Waiting for pairing code...';
         
     } catch (error) {
-        console.error('Error:', error);
-        statusText.textContent = 'Connection failed';
+        console.error('Fetch error:', error);
         document.querySelector('.spinner').style.display = 'none';
         errorSection.style.display = 'block';
         errorText.textContent = error.message;
     }
 });
 
-// Reset form function
+// Reset function
 function resetForm() {
     currentSessionId = null;
     statusSection.style.display = 'none';
@@ -142,21 +140,11 @@ function resetForm() {
     errorSection.style.display = 'none';
     phoneInput.value = '';
     startBtn.disabled = false;
-    startBtn.style.opacity = '1';
 }
 
-// Allow Enter key to submit
+// Allow Enter key
 phoneInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         startBtn.click();
-    }
-});
-
-// Clean up on page unload
-window.addEventListener('beforeunload', () => {
-    if (currentSessionId) {
-        fetch(`/api/disconnect/${currentSessionId}`, {
-            method: 'POST'
-        }).catch(console.error);
     }
 });
