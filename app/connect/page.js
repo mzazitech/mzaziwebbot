@@ -1,4 +1,5 @@
 "use client"
+
 import { useState } from "react"
 
 export default function ConnectBot(){
@@ -27,9 +28,9 @@ setLoading(false)
 
 return(
 
-<div style={{padding:"40px",fontFamily:"sans-serif"}}>
+<div style={{padding:"40px"}}>
 
-<h1>Connect Your WhatsApp Bot</h1>
+<h2>Connect WhatsApp Bot</h2>
 
 <br/>
 
@@ -53,7 +54,7 @@ style={{padding:"10px",width:"300px"}}
 onClick={connectBot}
 style={{
 padding:"10px 20px",
-background:"black",
+background:"green",
 color:"white",
 border:"none"
 }}
@@ -64,11 +65,12 @@ border:"none"
 <br/><br/>
 
 {pairing && (
+
 <div>
 
-<h2>Pairing Code</h2>
+<h3>Pairing Code</h3>
 
-<h1 style={{letterSpacing:"5px"}}>
+<h1 style={{letterSpacing:"6px"}}>
 {pairing}
 </h1>
 
@@ -77,9 +79,11 @@ Open WhatsApp → Linked Devices → Enter Code
 </p>
 
 </div>
+
 )}
 
 </div>
 
 )
+
 }
