@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bot Pairing</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 WhatsApp Bot Connection</h1>
+            <p>Connect your WhatsApp bot using phone number pairing</p>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section card">
+                <h2>Step 1: Enter Your Phone Number</h2>
+                <div class="input-group">
+                    <input type="tel" id="phoneNumber" placeholder="e.g., 1234567890" 
+                           pattern="[0-9]{10,15}" title="Please enter a valid phone number">
+                    <button id="startBtn" class="btn primary">Start Connection</button>
+                </div>
+                <p class="hint">Enter your phone number with country code (without + or spaces)</p>
+            </div>
+
+            <div class="status-section card" id="statusSection" style="display: none;">
+                <h2>Connection Status</h2>
+                <div class="status-indicator" id="statusIndicator">
+                    <div class="spinner"></div>
+                    <span id="statusText">Initializing...</span>
+                </div>
+                
+                <div class="pairing-code" id="pairingCodeSection" style="display: none;">
+                    <h3>Your Pairing Code:</h3>
+                    <div class="code-display" id="pairingCode"></div>
+                    <p class="instruction">
+                        📱 Open WhatsApp on your phone → Menu → Linked Devices → Link a Device<br>
+                        Enter this code when prompted
+                    </p>
+                </div>
+
+                <div class="qr-code" id="qrSection" style="display: none;">
+                    <h3>Or Scan QR Code:</h3>
+                    <div class="qr-container">
+                        <img id="qrImage" src="" alt="QR Code">
+                    </div>
+                </div>
+
+                <div class="success-message" id="successSection" style="display: none;">
+                    <div class="success-icon">✅</div>
+                    <h3>Successfully Connected!</h3>
+                    <p>Your WhatsApp bot is now active and ready to use.</p>
+                </div>
+
+                <div class="error-message" id="errorSection" style="display: none;">
+                    <div class="error-icon">❌</div>
+                    <h3>Connection Failed</h3>
+                    <p id="errorText"></p>
+                    <button class="btn secondary" onclick="resetForm()">Try Again</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions card">
+            <h3>📋 How to Connect:</h3>
+            <ol>
+                <li>Enter your phone number with country code (e.g., 1234567890 for US)</li>
+                <li>Click "Start Connection" button</li>
+                <li>Wait for the pairing code to appear</li>
+                <li>Open WhatsApp on your phone</li>
+                <li>Go to Menu (3 dots) → Linked Devices → Link a Device</li>
+                <li>Enter the 8-digit code shown here</li>
+                <li>Your bot will connect automatically!</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
