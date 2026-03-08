@@ -1,21 +1,31 @@
 {
-  "name": "whatsapp-pairing-server",
-  "version": "1.0.0",
-  "description": "WhatsApp Bot Pairing Website",
-  "main": "server.js",
+  "name": "trashbot",
+  "version": "5.0.0",
+  "main": "index.js",
+  "type": "commonjs",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "socket.io": "^4.7.2",
-    "@whiskeysockets/baileys": "^6.5.0",
-    "qrcode": "^1.5.3",
-    "dotenv": "^16.3.1",
+    "@trashcore/baileys": "latest",
+    "chalk": "^4.1.2",
+    "crypto": "^1.0.1",
+    "axios": "^0.27.2",
+    "api-dylux": "^1.8.5",
+    "node-fetch": "^3.3.2",
+    "node-webpmux": "^3.1.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "webp-converter": "latest",
+    "yt-search": "^2.10.4",
+    "pino": "^8.17.0",
+    "better-sqlite3": "latest",
+    "jimp": "latest",
+    "express": "^4.18.1",
+    "pg": "^8.11.3",
+    "node-cache": "^5.1.2",
     "cors": "^2.8.5"
   },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
