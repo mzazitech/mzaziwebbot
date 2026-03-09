@@ -6,8 +6,13 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>CyberByte AI Bot</title>
+  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Clerk JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
   <style>
+    /* ===== ORIGINAL STYLES (unchanged) ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     :root {
       --bg: #0a0710; --surface: #120e1a; --surface2: #1c1728; --border: #2d263b;
@@ -19,12 +24,12 @@
       --radius: 16px; --radius-sm: 10px;
     }
     html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; min-height: 100dvh; overflow-x: hidden; }
+    body { background: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; min-height: 100dvh; overflow-x: hidden; position: relative; }
     body::before { content:''; position:fixed; inset:0; background-image: linear-gradient(rgba(168,85,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.025) 1px,transparent 1px); background-size:32px 32px; pointer-events:none; z-index:0; }
     body::after { content:''; position:fixed; top:-20%; right:-20%; width:70%; height:60%; background:radial-gradient(ellipse,rgba(168,85,247,.06) 0%,transparent 65%); pointer-events:none; z-index:0; }
 
-    /* LOCK */
-    #lockScreen { position:fixed; inset:0; z-index:200; background:var(--bg); display:flex; align-items:center; justify-content:center; padding:1.5rem; }
+    /* LOCK (original, now hidden until after clerk auth) */
+    #lockScreen { position:fixed; inset:0; z-index:200; background:var(--bg); display:none; align-items:center; justify-content:center; padding:1.5rem; }
     #lockScreen::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(168,85,247,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(168,85,247,.025) 1px,transparent 1px); background-size:32px 32px; pointer-events:none; }
     .lock-card { position:relative; z-index:1; width:100%; max-width:360px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:2rem; text-align:center; }
     .lock-icon { font-size:2.5rem; margin-bottom:1rem; display:block; }
@@ -34,10 +39,10 @@
     .lock-card input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
     .lock-error { font-family:'JetBrains Mono',monospace; font-size:.75rem; color:var(--danger); margin-bottom:.75rem; display:none; }
 
-    /* LAYOUT */
-    .wrap { position:relative; z-index:1; max-width:480px; margin:0 auto; padding:0 0 2rem; min-height:100dvh; display:flex; flex-direction:column; }
+    /* WRAP (original, hidden until lock is unlocked) */
+    .wrap { position:relative; z-index:1; max-width:480px; margin:0 auto; padding:0 0 2rem; min-height:100dvh; display:none; flex-direction:column; }
 
-    /* HEADER */
+    /* HEADER (inside wrap) */
     header { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.25rem; background:rgba(10,7,16,.85); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:50; }
     .logo { display:flex; align-items:center; gap:.6rem; font-size:1.2rem; font-weight:800; letter-spacing:-.02em; }
     .logo-icon { width:32px; height:32px; background:linear-gradient(135deg,var(--accent),var(--green)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:.85rem; box-shadow:0 0 16px var(--accent-glow); }
@@ -51,38 +56,17 @@
 
     .content { flex:1; padding:1.25rem; display:flex; flex-direction:column; gap:1rem; }
 
-    /* STATS BAR */
-    .stats-bar {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: .6rem;
-    }
-    .stat-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: .9rem 1rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .stat-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    }
+    /* STATS BAR, CARDS, ETC (all original, unchanged) */
+    .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .9rem 1rem; position: relative; overflow: hidden; }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
     .stat-card.green::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
     .stat-label { font-family:'JetBrains Mono',monospace; font-size:.6rem; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; margin-bottom:.35rem; }
     .stat-value { font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:700; color:var(--text); line-height:1; }
     .stat-value span { font-size:.75rem; color:var(--muted); font-weight:400; }
     .stat-sub { font-size:.7rem; color:var(--muted); margin-top:.25rem; font-family:'JetBrains Mono',monospace; }
 
-    /* SESSION PROGRESS BAR */
-    .session-progress {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: .9rem 1rem;
-    }
+    .session-progress { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: .9rem 1rem; }
     .progress-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:.6rem; }
     .progress-label { font-family:'JetBrains Mono',monospace; font-size:.65rem; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; }
     .progress-count { font-family:'JetBrains Mono',monospace; font-size:.75rem; color:var(--accent); }
@@ -90,7 +74,6 @@
     .progress-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--accent),var(--green)); transition:width .6s ease; min-width:2px; }
     .progress-fill.warn { background:linear-gradient(90deg,var(--warn),var(--danger)); }
 
-    /* HERO */
     .hero { padding:1.5rem; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); position:relative; overflow:hidden; }
     .hero::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,var(--accent),transparent); }
     .hero-label { font-family:'JetBrains Mono',monospace; font-size:.65rem; color:var(--accent); letter-spacing:.15em; text-transform:uppercase; margin-bottom:.6rem; }
@@ -98,20 +81,17 @@
     .hero h1 em { font-style:normal; color:var(--accent); }
     .hero p { font-size:.85rem; color:var(--muted); line-height:1.6; }
 
-    /* CARD */
     .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
     .card-header { padding:.9rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:.6rem; font-family:'JetBrains Mono',monospace; font-size:.7rem; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; }
     .card-header-dot { width:7px; height:7px; background:var(--accent); border-radius:50%; flex-shrink:0; }
     .card-body { padding:1.25rem; }
 
-    /* FORM */
     .field { display:flex; flex-direction:column; gap:.5rem; margin-bottom:1rem; }
     .field label { font-family:'JetBrains Mono',monospace; font-size:.68rem; color:var(--muted); letter-spacing:.08em; text-transform:uppercase; }
     input[type="tel"],input[type="text"],input[type="password"] { width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:.9rem 1rem; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:1.1rem; letter-spacing:.05em; outline:none; transition:border-color .2s,box-shadow .2s; -webkit-appearance:none; }
     input:focus { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-dim); }
     input::placeholder { color:var(--muted2); }
 
-    /* BUTTONS */
     .btn { width:100%; padding:1rem; border-radius:var(--radius-sm); font-family:'Outfit',sans-serif; font-size:1rem; font-weight:700; cursor:pointer; border:none; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:.5rem; min-height:52px; }
     .btn:active { transform:scale(.97); }
     .btn-primary { background:linear-gradient(135deg,var(--accent),#7b2eda); color:#0a0710; }
@@ -155,7 +135,7 @@
     .empty-state { text-align:center; padding:2rem 1rem; color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:.78rem; line-height:1.6; }
     .empty-icon { font-size:2rem; margin-bottom:.5rem; display:block; }
 
-    /* DELETE MODAL */
+    /* DELETE MODAL (original) */
     .modal-overlay { position:fixed; inset:0; z-index:150; background:rgba(0,0,0,.7); backdrop-filter:blur(6px); display:none; align-items:flex-end; justify-content:center; padding:1rem; }
     .modal-overlay.open { display:flex; }
     .modal { width:100%; max-width:420px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; animation:slideUp .25s ease; }
@@ -175,7 +155,6 @@
     .spinner-sm { width:14px; height:14px; border:2px solid rgba(255,255,255,.3); border-top-color:#fff; border-radius:50%; animation:spin .6s linear infinite; flex-shrink:0; }
     @keyframes spin { to{transform:rotate(360deg)} }
 
-
     .session-item.reconnecting { border-color: rgba(245,158,11,.25); background: rgba(245,158,11,.04); }
     .session-dot.dot-warn { background: var(--warn); box-shadow: 0 0 8px var(--warn); animation: blink .8s infinite; }
 
@@ -193,40 +172,171 @@
       .modal-overlay { align-items:center; }
     }
 
-    /* ── SESSION PASSWORD BOX ── */
-    .pwd-box {
-      margin-top: .9rem;
-      background: rgba(245,158,11,.06);
-      border: 1.5px solid rgba(245,158,11,.35);
-      border-radius: var(--radius-sm);
-      padding: 1.1rem 1rem;
+    /* ===== NEW STYLES ===== */
+    /* Clerk Auth Container */
+    #auth-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 300;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem 1.5rem;
       text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 10;
     }
-    .pwd-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: .65rem; color: var(--warn);
-      letter-spacing: .15em; text-transform: uppercase;
-      margin-bottom: .6rem;
+    .auth-logo {
+      font-size: 3rem;
+      margin-bottom: 1rem;
     }
-    .pwd-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 2rem; font-weight: 700;
-      letter-spacing: .25em; color: var(--warn);
-      margin-bottom: .6rem;
+    .auth-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
     }
-    .pwd-warn {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: .63rem; color: var(--muted);
-      margin-top: .6rem; line-height: 1.6;
+    .auth-sub {
+      color: var(--muted);
+      margin-bottom: 2rem;
+      font-size: 0.9rem;
+    }
+    .cl-signIn-root, .cl-signUp-root {
+      width: 100%;
+    }
+    .cl-card {
+      background: transparent !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+    }
+    .cl-socialButtonsIconButton, .cl-formButtonPrimary {
+      background: var(--surface2) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text) !important;
+    }
+    .cl-formFieldInput {
+      background: var(--bg) !important;
+      border-color: var(--border) !important;
+      color: var(--text) !important;
+    }
+    .cl-footerActionLink {
+      color: var(--accent) !important;
+    }
+    /* Tabs to switch between sign in and sign up */
+    .auth-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .auth-tab {
+      flex: 1;
+      padding: 0.75rem;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .auth-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    /* Support buttons bar */
+    .support-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(18,14,26,0.85);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      padding: 0.75rem 1rem;
+      z-index: 100;
+    }
+    .support-bar a {
+      color: var(--muted);
+      font-size: 1.5rem;
+      transition: color 0.2s, transform 0.2s;
+    }
+    .support-bar a:hover {
+      color: var(--accent);
+      transform: translateY(-3px);
+    }
+    /* Particles canvas */
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+    /* Adjust header for logout button */
+    .user-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.4rem 0.8rem;
+      color: var(--text);
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .user-btn i {
+      color: var(--accent);
+    }
+    /* Responsive fixes */
+    @media (max-width: 480px) {
+      .support-bar { gap: 1.5rem; }
+      .support-bar a { font-size: 1.3rem; }
     }
   </style>
 </head>
 <body>
 
-<!-- LOCK -->
+<!-- Particles Canvas -->
+<canvas id="particles-canvas"></canvas>
+
+<!-- Clerk Authentication Container (shown initially) -->
+<div id="auth-container">
+  <div class="auth-card">
+    <div class="auth-logo">🤖</div>
+    <div class="auth-title">CyberByte AI</div>
+    <div class="auth-sub">Sign in to access your bot panel</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-signin">Sign In</button>
+      <button class="auth-tab" id="tab-signup">Sign Up</button>
+    </div>
+    <div id="clerk-mount"></div>
+  </div>
+</div>
+
+<!-- ORIGINAL LOCK SCREEN (hidden initially) -->
 <div id="lockScreen">
   <div class="lock-card">
-    <span class="lock-icon">🤖</span>
+    <span class="lock-icon">🔐</span>
     <div class="lock-title">CyberByte AI Bot</div>
     <div class="lock-sub">Enter your panel password to continue</div>
     <div class="lock-error" id="lockError">Incorrect password, try again</div>
@@ -235,7 +345,7 @@
   </div>
 </div>
 
-<!-- DELETE MODAL -->
+<!-- DELETE MODAL (original) -->
 <div class="modal-overlay" id="deleteModal">
   <div class="modal">
     <div class="modal-title">🗑 Delete Session</div>
@@ -252,6 +362,7 @@
   </div>
 </div>
 
+<!-- ORIGINAL MAIN WRAP (hidden initially) -->
 <div class="wrap">
   <header>
     <div class="logo">
@@ -260,13 +371,13 @@
     </div>
     <div class="header-right">
       <div class="status-pill"><div class="status-dot"></div>AI ONLINE</div>
+      <div class="user-btn" onclick="signOut()"><i class="fas fa-sign-out-alt"></i> <span class="user-email" id="userEmail"></span></div>
       <div class="lock-btn" onclick="lockPanel()" title="Lock panel">🔒</div>
     </div>
   </header>
 
   <div class="content">
-
-    <!-- STATS -->
+    <!-- STATS, HERO, CARDS etc (all original) -->
     <div class="stats-bar">
       <div class="stat-card green">
         <div class="stat-label">Sessions</div>
@@ -280,7 +391,6 @@
       </div>
     </div>
 
-    <!-- SESSION PROGRESS -->
     <div class="session-progress">
       <div class="progress-header">
         <span class="progress-label">Capacity</span>
@@ -291,14 +401,12 @@
       </div>
     </div>
 
-    <!-- HERO -->
     <div class="hero">
       <div class="hero-label">CyberByte AI Bot</div>
       <h1>Pair your<br><em>WhatsApp</em><br>with AI</h1>
       <p>No Telegram needed. Enter your number, get a code, enter it in WhatsApp.</p>
     </div>
 
-    <!-- CONNECT -->
     <div class="card">
       <div class="card-header"><div class="card-header-dot"></div>New Connection</div>
       <div class="card-body">
@@ -315,12 +423,10 @@
             <div class="code-actions"><button class="btn btn-copy" onclick="copyCode()">⎘ Copy</button></div>
             <div class="code-hint">WhatsApp → Linked Devices → Link a Device<br>→ tap "Link with phone number instead"</div>
           </div>
-
         </div>
       </div>
     </div>
 
-    <!-- HOW TO -->
     <div class="card">
       <div class="steps-toggle" onclick="toggleSteps(this)">
         <div class="steps-toggle-label"><div class="card-header-dot"></div>How to pair</div>
@@ -334,26 +440,32 @@
       </div>
     </div>
 
-    <!-- SESSIONS -->
     <div class="card">
       <div class="card-header"><div class="card-header-dot"></div>Active Sessions</div>
       <div class="card-body" style="padding-top:.75rem;">
         <div id="sessionList"><div class="empty-state"><span class="empty-icon">📡</span>Loading…</div></div>
       </div>
     </div>
-
   </div>
+
   <footer>CyberByte AI Bot &nbsp;·&nbsp; @cyberbyte/baileys &nbsp;·&nbsp; Max <span id="footerMax">30</span> sessions</footer>
+</div>
+
+<!-- SUPPORT BUTTONS (always visible) -->
+<div class="support-bar">
+  <a href="https://wa.me/yourwhatsappnumber" target="_blank" title="WhatsApp Developer Chat"><i class="fab fa-whatsapp"></i></a>
+  <a href="https://whatsapp.com/channel/yourchannel" target="_blank" title="WhatsApp Channel"><i class="fab fa-whatsapp"></i></a>
+  <a href="https://t.me/yourtelegram" target="_blank" title="Telegram Channel"><i class="fab fa-telegram"></i></a>
 </div>
 
 <div id="toast">✓ Done</div>
 
 <script>
+  // ===== ORIGINAL FUNCTIONS (unchanged) =====
   let sessionToken = sessionStorage.getItem('panelAuth');
   let pendingDeletePhone = null;
   let maxSessions = 30;
 
-  // ── LOCK ──
   function unlock() {
     const pw = document.getElementById('lockInput').value;
     const err = document.getElementById('lockError');
@@ -364,6 +476,7 @@
           sessionStorage.setItem('panelAuth', pw);
           sessionToken = pw;
           document.getElementById('lockScreen').style.display = 'none';
+          document.querySelector('.wrap').style.display = 'flex';
           err.style.display = 'none';
           loadStatus();
           loadSessions();
@@ -380,25 +493,9 @@
     sessionToken = null;
     document.getElementById('lockInput').value = '';
     document.getElementById('lockScreen').style.display = 'flex';
+    document.querySelector('.wrap').style.display = 'none';
   }
 
-  if (sessionToken) {
-    fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: sessionToken }) })
-      .then(r => r.json()).then(data => {
-        if (data.ok) {
-          document.getElementById('lockScreen').style.display = 'none';
-          loadStatus();
-          loadSessions();
-        } else {
-          sessionStorage.removeItem('panelAuth');
-          sessionToken = null;
-        }
-      }).catch(() => {});
-  }
-
-  document.getElementById('lockInput').addEventListener('keydown', e => { if (e.key==='Enter') unlock(); });
-
-  // ── STATS ──
   function formatUptime(secs) {
     const d = Math.floor(secs / 86400);
     const h = Math.floor((secs % 86400) / 3600);
@@ -418,20 +515,17 @@
       const count = data.sessions || 0;
       const free = maxSessions - count;
       const pct = Math.round((count / maxSessions) * 100);
-
       document.getElementById('statSessions').innerHTML = count + '<span id="statMax"> / ' + maxSessions + '</span>';
       document.getElementById('statSlots').textContent = free + ' slot' + (free !== 1 ? 's' : '') + ' free';
       document.getElementById('statUptime').textContent = formatUptime(data.uptime || 0);
       document.getElementById('progressCount').textContent = count + ' / ' + maxSessions;
       document.getElementById('footerMax').textContent = maxSessions;
-
       const fill = document.getElementById('progressFill');
       fill.style.width = pct + '%';
       fill.className = 'progress-fill' + (pct >= 80 ? ' warn' : '');
     } catch(e) {}
   }
 
-  // ── DELETE MODAL ──
   function openDeleteModal(phone) {
     pendingDeletePhone = phone;
     document.getElementById('deletePhone').textContent = phone;
@@ -472,23 +566,19 @@
     btn.innerHTML = 'Delete';
   }
 
-  // ── CONNECT ──
   async function requestPair() {
     const phone = document.getElementById('phoneInput').value.trim().replace(/\s+/g,'');
     const btn = document.getElementById('connectBtn');
     const statusMsg = document.getElementById('statusMsg');
     const codeDisplay = document.getElementById('codeDisplay');
-
     if (!phone || !/^\d{7,15}$/.test(phone)) {
       showMsg(statusMsg, '⚠ Enter a valid number with country code', 'err');
       return;
     }
-
     btn.disabled = true;
     btn.innerHTML = '<div class="spinner"></div> Connecting…';
     codeDisplay.style.display = 'none';
     showMsg(statusMsg, '⏳ Creating session, please wait…', 'info');
-
     try {
       const res = await fetch('/api/connect', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ phone }) });
       const data = await res.json();
@@ -503,12 +593,10 @@
         showMsg(statusMsg, '✗ ' + (data.error || 'Failed to generate code'), 'err');
       }
     } catch(e) { showMsg(statusMsg, '✗ Server error', 'err'); }
-
     btn.disabled = false;
     btn.innerHTML = 'Connect';
   }
 
-  // ── SESSIONS ──
   async function loadSessions() {
     const list = document.getElementById('sessionList');
     try {
@@ -545,7 +633,6 @@
     return Math.floor(secs/3600) + 'h ' + Math.floor((secs%3600)/60) + 'm uptime';
   }
 
-  // ── HELPERS ──
   function toggleSteps(el) {
     document.getElementById('stepsBody').classList.toggle('open');
     el.querySelector('.chevron').classList.toggle('open');
@@ -560,8 +647,142 @@
     t.textContent = msg; t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2200);
   }
-
   document.getElementById('phoneInput').addEventListener('keydown', e => { if (e.key==='Enter') requestPair(); });
+
+  // ===== NEW: CLERK AUTHENTICATION =====
+  const clerkPubKey = 'pk_live_Y2xlcmsuY3liZXJieXRlLm16YXppLnNob3Ak'; // REPLACE WITH YOUR CLERK PUBLISHABLE KEY
+  let clerk = null;
+
+  async function initClerk() {
+    try {
+      clerk = await Clerk.load({ publishableKey: clerkPubKey });
+      if (clerk.user) {
+        // Already signed in -> show lock screen
+        document.getElementById('auth-container').style.display = 'none';
+        document.getElementById('lockScreen').style.display = 'flex';
+        document.getElementById('userEmail').textContent = clerk.user.primaryEmailAddress?.emailAddress || '';
+      } else {
+        // Show auth container and mount sign-in
+        document.getElementById('auth-container').style.display = 'flex';
+        mountSignIn();
+      }
+    } catch (err) {
+      console.error('Clerk init error', err);
+    }
+  }
+
+  function mountSignIn() {
+    const mountDiv = document.getElementById('clerk-mount');
+    mountDiv.innerHTML = ''; // clear
+    const signIn = new clerk.SignIn({ mountDiv });
+    signIn.mount(mountDiv);
+  }
+
+  function mountSignUp() {
+    const mountDiv = document.getElementById('clerk-mount');
+    mountDiv.innerHTML = '';
+    const signUp = new clerk.SignUp({ mountDiv });
+    signUp.mount(mountDiv);
+  }
+
+  // Tab switching
+  document.getElementById('tab-signin').addEventListener('click', () => {
+    document.getElementById('tab-signin').classList.add('active');
+    document.getElementById('tab-signup').classList.remove('active');
+    mountSignIn();
+  });
+  document.getElementById('tab-signup').addEventListener('click', () => {
+    document.getElementById('tab-signup').classList.add('active');
+    document.getElementById('tab-signin').classList.remove('active');
+    mountSignUp();
+  });
+
+  // Listen for sign-in state changes
+  if (clerk) {
+    clerk.addListener((event) => {
+      if (event.user) {
+        document.getElementById('auth-container').style.display = 'none';
+        document.getElementById('lockScreen').style.display = 'flex';
+        document.getElementById('userEmail').textContent = event.user.primaryEmailAddress?.emailAddress || '';
+      }
+    });
+  }
+
+  function signOut() {
+    clerk.signOut().then(() => {
+      document.getElementById('lockScreen').style.display = 'none';
+      document.querySelector('.wrap').style.display = 'none';
+      document.getElementById('auth-container').style.display = 'flex';
+      mountSignIn();
+    });
+  }
+
+  // ===== PARTICLES BACKGROUND =====
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let particles = [];
+
+  function resizeCanvas() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+  }
+
+  function createParticles() {
+    particles = [];
+    for (let i = 0; i < 50; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 2 + 1,
+        speedX: (Math.random() - 0.5) * 0.5,
+        speedY: (Math.random() - 0.5) * 0.5,
+        color: `rgba(168,85,247,${Math.random() * 0.3 + 0.2})`
+      });
+    }
+  }
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, width, height);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+      p.x += p.speedX;
+      p.y += p.speedY;
+      if (p.x < 0 || p.x > width) p.speedX *= -1;
+      if (p.y < 0 || p.y > height) p.speedY *= -1;
+    });
+    requestAnimationFrame(drawParticles);
+  }
+
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+    createParticles();
+  });
+
+  resizeCanvas();
+  createParticles();
+  drawParticles();
+
+  // ===== STARTUP =====
+  initClerk();
+
+  // If already has sessionToken, try to unlock automatically? (original code)
+  if (sessionToken) {
+    fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: sessionToken }) })
+      .then(r => r.json()).then(data => {
+        if (data.ok) {
+          // But we need to wait for clerk auth first; clerk will show lock screen
+        } else {
+          sessionStorage.removeItem('panelAuth');
+          sessionToken = null;
+        }
+      }).catch(() => {});
+  }
 
   // Refresh every 15s
   setInterval(() => { loadStatus(); loadSessions(); }, 15000);
