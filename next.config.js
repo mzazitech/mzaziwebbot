@@ -1,17 +1,8 @@
-// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
-
-  // Optional: configure image domains if you use next/image
+  output: 'export',  // replaces `next export`
   images: {
-    remotePatterns: [
-      // Example: if you load images from Clerk
-      // {
-      //   protocol: 'https',
-      //   hostname: 'img.clerk.com',
-      // },
-    ],
+    unoptimized: true, // required if you use next/image (Render's static hosting doesn't support image optimization)
   },
 };
 
