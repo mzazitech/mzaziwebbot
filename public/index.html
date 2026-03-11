@@ -476,7 +476,7 @@
     try {
       const res = await fetch('/api/status');
       const data = await res.json();
-      maxSessions = data.maxSessions || 30;
+      maxSessions = data.maxSessions || 90;
       const count = data.sessions || 0;
       const free = maxSessions - count;
       const pct = Math.round((count / maxSessions) * 100);
