@@ -34,7 +34,7 @@ async function handleMessage(trashcore, m) {
   if (!text) return;
 
   // Settings are now scoped to this bot's phone number
-  const prefix      = getSetting(botNumber, "prefix", "💥");
+  const prefix      = getSetting(botNumber, "prefix", "");
   const privateMode = getSetting(botNumber, "privateMode", false);
 
   if (!text.startsWith(prefix)) return;
