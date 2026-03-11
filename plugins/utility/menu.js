@@ -36,7 +36,7 @@ module.exports = {
     const uptimeSeconds = Math.max(1, Math.floor((Date.now() - (global.botStartTime || Date.now())) / 1000));
     const uptime = formatUptime(uptimeSeconds);
 
-    const prefix      = getSetting(botNumber, "prefix", "Only Owner knows");
+    const prefix      = getSetting(botNumber, "prefix", "");
     const privateMode = getSetting(botNumber, "privateMode", false);
     const mode = privateMode ? "PRIVATE" : "PUBLIC";
     const totalPlugins = plugins.size;
