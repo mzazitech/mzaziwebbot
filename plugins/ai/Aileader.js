@@ -51,7 +51,7 @@ return leaderboards
 }
 
 module.exports = {
-command: "ai-leaderboard",
+command: "ai-rank",
 desc: "View best AI models leaderboard from LMArena",
 category: "AI",
 usage: ".ai-leaderboard [category]",
