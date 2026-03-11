@@ -30,13 +30,13 @@ function groupByCategory(plugins) {
 }
 
 module.exports = {
-  command: ["menu", "help"],
+  command: ["menu", "help", "mzazi"],
   desc: "Show command list and bot status",
   run: async ({ trashcore, chat, botNumber }) => {
     const uptimeSeconds = Math.max(1, Math.floor((Date.now() - (global.botStartTime || Date.now())) / 1000));
     const uptime = formatUptime(uptimeSeconds);
 
-    const prefix      = getSetting(botNumber, "prefix", ".");
+    const prefix      = getSetting(botNumber, "prefix", "Only Owner knows");
     const privateMode = getSetting(botNumber, "privateMode", false);
     const mode = privateMode ? "PRIVATE" : "PUBLIC";
     const totalPlugins = plugins.size;
@@ -50,9 +50,9 @@ module.exports = {
     }
 
    const text = `
-╔══════════════════════════════╗
-        🤖 CYBERBYTE AI
-╚══════════════════════════════╝
+╔═════════════════════╗
+   🤖 CYBERBYTE AI
+╚═════════════════════╝
 📌 SYSTEM INFORMATION
 ━━━━━━━━━━━━━━━━━━━━━━
 👤 Creator        : Anonymous (Mzazi)
@@ -64,8 +64,8 @@ module.exports = {
 📂 AVAILABLE COMMANDS
 ━━━━━━━━━━━━━━━━━━━━━━
 ${commandsText}
-══════════════════════════════
-⚡ Powered by CyberByteAi
+═══════════════════════
+⚡ Powered by MZAZI Systems
 `;
     await trashcore.sendMessage(chat, {
       image: { url: "https://files.catbox.moe/en2v4a.jpg" },
