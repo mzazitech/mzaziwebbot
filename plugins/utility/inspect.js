@@ -1,132 +1,162 @@
 module.exports = {
-    command: "inspect",
-    desc: "Check WhatsApp group or channel information using an invite link",
-    category: "Utility",
-    usage: ".inspect <group/channel link>",
+command: "inspect",
+desc: "Check WhatsApp group or channel information using a link",
+category: "Utility",
+usage: ".inspect <group/channel link>",
 
-    run: async ({ m, sock, args, xreply }) => {
+run: async ({ m, trashcore, args, xreply }) => {
 
-        const text = args.join(" ").trim()
+try {
 
-        if (!text) {
-            return xreply(
-                🔍 *INSPECT COMMAND*\n\n +
-                Check information about a WhatsApp group or channel using a link.\n\n +
-                Example:\n +
-                .inspect https://chat.whatsapp.com/xxxx\n +
-                .inspect https://whatsapp.com/channel/xxxx
-            )
-        }
+const text = args.join(" ").trim()
 
-        const groupPattern = /chat\.whatsapp\.com\/([\w\d]*)/
-        const channelPattern = /whatsapp\.com\/channel\/([\w\d]*)/
+if (!text) {
+return xreply(
+"🔎 *INSPECT COMMAND*\n\n" +
+"Check information about a WhatsApp group or channel using a link.\n\n" +
+"Example:\n" +
+".inspect https://chat.whatsapp.com/xxxx\n" +
+".inspect https://whatsapp.com/channel/xxxx"
+)
+}
 
-        await m.react("🔍")
+const groupPattern = /chat\.whatsapp\.com\/([\w\d]*)/
+const channelPattern = /whatsapp\.com\/channel\/([\w\d]*)/
 
-        try {
+// ================= GROUP =================
+if (groupPattern.test(text)) {
 
-            if (groupPattern.test(text)) {
+const inviteCode = text.match(groupPattern)[1]
 
-                const inviteCode = text.match(groupPattern)[1]
-                const groupInfo = await sock.groupGetInviteInfo(inviteCode)
+const groupInfo = await trashcore.groupGetInviteInfo(inviteCode)
 
-                let message =
-                    📋 *GROUP INFORMATION*\n\n +
-                    Name: ${groupInfo.subject}\n +
-                    ID: ${groupInfo.id}\n +
-                    Created: ${new Date(groupInfo.creation * 1000).toLocaleString()}\n
+let message = "📋 *GROUP INFORMATION*\n\n"
 
-                if (groupInfo.owner) {
-                    message += Creator: @${groupInfo.owner.split("@")[0]}\n
-                }
+message += "Name: " + groupInfo.subject + "\n"
+message += "ID: " + groupInfo.id + "\n"
+message += "Created: " + new Date(groupInfo.creation * 1000).toLocaleString() + "\n"
 
-                message +=
-                    Restricted: ${groupInfo.restrict ? "Yes" : "No"}\n +
-                    Announcement Only: ${groupInfo.announce ? "Yes" : "No"}\n +
-                    Community: ${groupInfo.isCommunity ? "Yes" : "No"}\n +
-                    Join Approval: ${groupInfo.joinApprovalMode ? "Yes" : "No"}\n +
-                    Members: ${groupInfo.participants?.length || 0}\n\n
+if (groupInfo.owner) {
+message += "Creator: @" + groupInfo.owner.split("@")[0] + "\n"
+}
 
-                if (groupInfo.desc) {
-                    message += Description:\n${groupInfo.desc}\n\n
-                }
+message += "Restricted: " + (groupInfo.restrict ? "Yes" : "No") + "\n"
+message += "Announcement Only: " + (groupInfo.announce ? "Yes" : "No") + "\n"
+message += "Community: " + (groupInfo.isCommunity ? "Yes" : "No") + "\n"
+message += "Join Approval: " + (groupInfo.joinApprovalMode ? "Yes" : "No") + "\n"
 
-                if (groupInfo.participants?.length > 0) {
-                    const admins = groupInfo.participants.filter(p => p.admin)
+if (groupInfo.participants) {
+message += "Members: " + groupInfo.participants.length + "\n"
+}
 
-                    if (admins.length > 0) {
-                        message += Admins:\n
-                        admins.forEach(a => {
-                            message += - @${a.id.split("@")[0]} (${a.admin})\n
-                        })
-                    }
-                }
+message += "\n"
 
-                const mentions = []
-                if (groupInfo.owner) mentions.push(groupInfo.owner)
+if (groupInfo.desc) {
+message += "*Description*\n"
+message += groupInfo.desc + "\n\n"
+}
 
-                if (groupInfo.participants) {
-                    groupInfo.participants
-                        .filter(p => p.admin)
-                        .forEach(a => mentions.push(a.id))
-                }
+if (groupInfo.participants) {
 
-                await m.react("✅")
+const admins = groupInfo.participants.filter(function(p){
+return p.admin
+})
 
-                return sock.sendMessage(
-                    m.chat,
-                    { text: message, mentions },
-                    { quoted: m }
-                )
+if (admins.length > 0) {
 
-            }
+message += "*Admins*\n"
 
-            else if (channelPattern.test(text)) {
+admins.forEach(function(a){
+message += "- @" + a.id.split("@")[0] + " (" + a.admin + ")\n"
+})
 
-                const channelId = text.match(channelPattern)[1]
-                const channelInfo = await sock.newsletterMsg(channelId)
+}
 
-                const message =
-                   📺 *CHANNEL INFORMATION*\n\n` +
-                    ID: ${channelInfo.id}\n +
-                    State: ${channelInfo.state?.type || "-"}\n +
-                    Name: ${channelInfo.thread_metadata?.name?.text || "-"}\n +
-                    Created: ${new Date((channelInfo.thread_metadata?.creation_time || 0) * 1000).toLocaleString()}\n +
-                    Subscribers: ${channelInfo.thread_metadata?.subscribers_count || 0}\n +
-                    Verification: ${channelInfo.thread_metadata?.verification || "-"}\n\n +
-                    Description:\n${channelInfo.thread_metadata?.description?.text || "No description"}
+}
 
-                await m.react("✅")
+let mentions = []
 
-                return xreply(message)
+if (groupInfo.owner) {
+mentions.push(groupInfo.owner)
+}
 
-            }
+if (groupInfo.participants) {
 
-            else {
-                return xreply("❌ Only WhatsApp Group or Channel links are supported.")
-            }
+groupInfo.participants.forEach(function(p){
+if (p.admin) mentions.push(p.id)
+})
 
-        } catch (error) {
+}
 
-            await m.react("❌")
+return trashcore.sendMessage(
+m.chat,
+{ text: message, mentions: mentions },
+{ quoted: m }
+)
 
-            if (error.data) {
+}
 
-                if ([400, 406].includes(error.data)) {
-                    return xreply("❌ Group or channel not found.")
-                }
+// ================= CHANNEL =================
+else if (channelPattern.test(text)) {
 
-                if (error.data === 401) {
-                    return xreply("❌ The bot was removed from that group.")
-                }
+const channelId = text.match(channelPattern)[1]
 
-                if (error.data === 410) {
-                    return xreply("❌ The group invite link has been reset.")
-                }
+const channelInfo = await trashcore.newsletterMsg(channelId)
 
-            }
+let message = "📺 *CHANNEL INFORMATION*\n\n"
 
-            return xreply(❌ Error: ${error.message})
-        }
-    }
+message += "ID: " + channelInfo.id + "\n"
+
+if (channelInfo.state && channelInfo.state.type) {
+message += "State: " + channelInfo.state.type + "\n"
+}
+
+if (channelInfo.thread_metadata) {
+
+const meta = channelInfo.thread_metadata
+
+if (meta.name && meta.name.text) {
+message += "Name: " + meta.name.text + "\n"
+}
+
+if (meta.creation_time) {
+message += "Created: " + new Date(meta.creation_time * 1000).toLocaleString() + "\n"
+}
+
+if (meta.subscribers_count) {
+message += "Subscribers: " + meta.subscribers_count + "\n"
+}
+
+if (meta.verification) {
+message += "Verification: " + meta.verification + "\n"
+}
+
+message += "\n"
+
+if (meta.description && meta.description.text) {
+message += "*Description*\n" + meta.description.text
+} else {
+message += "*Description*\nNo description"
+}
+
+}
+
+return xreply(message)
+
+}
+
+// ================= INVALID =================
+else {
+
+return xreply("❌ Only WhatsApp group or channel links are supported.")
+
+}
+
+} catch (err) {
+
+return xreply("❌ Error: " + err.message)
+
+}
+
+}
 }
