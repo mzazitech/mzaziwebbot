@@ -49,18 +49,25 @@ module.exports = {
       commandsText += cmds.map(cmd => `• ${prefix}${cmd}`).join("\n") + "\n";
     }
 
-    const text = `
-🥷 *TRASHBOT MENU*
+   const text = `
+╔══════════════════════════════╗
+        🤖 CYBERBYTE AI
+╚══════════════════════════════╝
+📌 SYSTEM INFORMATION
+━━━━━━━━━━━━━━━━━━━━━━
+👤 Creator        : Anonymous (Mzazi)
+🔑 Command Prefix : ${prefix}
+⚙️ Bot Mode       : ${mode}
+🧩 Total Plugins  : ${totalPlugins}
+⏳ Uptime         : ${uptime}
 
-⬡ Creator: Trashcore
-⬡ Bot prefix: ${prefix}
-⬡ Bot mode: ${mode}
-⬡ Total plugins: ${totalPlugins}
-⬡ Bot uptime: ${uptime}
-
+📂 AVAILABLE COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━
 ${commandsText}
-`;
 
+══════════════════════════════
+⚡ Powered by CyberByteAi
+`;
     await trashcore.sendMessage(chat, {
       image: { url: "https://files.catbox.moe/en2v4a.jpg" },
       caption: text
