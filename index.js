@@ -176,7 +176,7 @@ async function startBot(phoneNumber, onCode = null) {
       watchPlugins();
 
       const prefix = getSetting(botNum, 'prefix') || config.PREFIX || '.';
-      const msg = `💠 *${config.BOT_NAME || 'TelexWA'} ACTIVATED*\n\n> ❐ Prefix: ${prefix}\n> ❐ Plugins: ${plugins.size}\n> ❐ Connected: wa.me/${botNum}\n✓ Uptime: _${formatUptime(Date.now() - global.botStartTime)}_`;
+      const msg = `💠 *${config.BOT_NAME || 'CyberByte Ai'} ACTIVATED*\n\n> ❐ Prefix: ${prefix}\n> ❐ Plugins: ${plugins.size}\n> ❐ Connected: wa.me/${botNum}\n✓ Uptime: _${formatUptime(Date.now() - global.botStartTime)}_`;
       await trashcore.sendMessage(`${botNum}@s.whatsapp.net`, { text: msg });
 
       try {
@@ -230,7 +230,7 @@ app.use(cors({ origin: '*', methods: ['GET', 'POST'], allowedHeaders: ['Content-
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const PANEL_PASSWORD = process.env.PANEL_PASSWORD || config.PANEL_PASSWORD || 'admin123';
+const PANEL_PASSWORD = process.env.PANEL_PASSWORD || config.PANEL_PASSWORD || 'CyberByteAi';
 const MAX_SESSIONS   = parseInt(process.env.MAX_SESSIONS || config.MAX_SESSIONS || '30');
 
 function requireAuth(req, res, next) {
