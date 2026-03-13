@@ -1,15 +1,18 @@
 module.exports = {
-  command: "setprefix",
-  desc: "Change command prefix (bot owner only)",
-  category: "Admin",
-  usage: ".setprefix <new_prefix>",
-  run: async ({ m, args, xreply, isOwner, botNumber }) => {
+  command: ["setname", "botnick"],
+  desc: "Change the bot's display name (owner only)",
+  category: "Owner",
+  usage: ".setname <new name>",
+  isOwner: true,
+  run: async ({ trashcore, args, isOwner, xreply }) => {
     if (!isOwner) return xreply("❌ Only the bot owner can use this command.");
-    if (!args[0]) return xreply("❌ Usage: .setprefix <new_prefix>");
-
-    const { setSetting } = require("../../database");
-    setSetting(botNumber, "prefix", args[0]);
-
-    await xreply(`✅ Command prefix updated to: \`${args[0]}\``);
+    if (!args.length) return xreply("❌ Usage: .setname <new name>");
+    const name = args.join(" ");
+    try {
+      await trashcore.updateProfileName(name);
+      return xreply(`✅ Bot name updated to: *${name}*`);
+    } catch {
+      return xreply("❌ Failed to update bot name.");
+    }
   }
 };
