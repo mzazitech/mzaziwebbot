@@ -47,9 +47,56 @@ async function handleMessage(trashcore, m) {
 
   if (privateMode && !isOwner) return;
 
-  const xreply = async (replyText) => {
-    await trashcore.sendMessage(chatId, { text: replyText }, { quoted: m });
-  };
+const cina = ["https://i.ibb.co/bMyHpNzT/d8d9e8676820a15b.jpg","https://i.ibb.co/bMyHpNzT/d8d9e8676820a15b.jpg","https://i.ibb.co/bMyHpNzT/d8d9e8676820a15b.jpg","https://i.ibb.co/bMyHpNzT/d8d9e8676820a15b.jpg"]
+
+const loli = {
+  key: {
+    fromMe: false,
+    participant: "13135550002@s.whatsapp.net",
+    remoteJid: "status@broadcast"
+  },
+  message: {
+    orderMessage: {
+      orderId: "2009",
+      thumbnail: cina,
+      itemCount: "9741",
+      status: "INQUIRY",
+      surface: "CATALOG",
+      message: `CyberByteAi.mzazi.shop`,
+      token: "AR6xBKbXZn0Xwmu76Ksyd7rnxI+Rx87HfinVlW4lwXa6JA=="
+    }
+  },
+  contextInfo: {
+    mentionedJid: ["120363369514105242@s.whatsapp.net"],
+    forwardingScore: 999,
+    isForwarded: false,
+  }
+}
+
+const reply = async(subject) => { 
+trashcore.sendMessage(m.chat, { text : subject,
+contextInfo: {
+mentionedJid: [m.sender],
+forwardingScore: 9999, 
+isForwarded: false, 
+forwardedNewsletterMessageInfo: {
+newsletterJid: '120363406028122214@newsletter',
+serverMessageId: 20,
+newsletterName: '୧⍤⃝୧CyberByteAi୧⍤⃝୧'
+},
+externalAdReply: {
+title: "୧⍤⃝୧CyberByteAi୧⍤⃝୧", 
+body: "",
+thumbnailUrl: "https://files.catbox.moe/8ekyzy.jpg", 
+sourceUrl: null,
+mediaType: 1
+}}}, { quoted : loli })
+}
+function stylishReply(text) {
+    return `${text}`;
+}
+
+  
 
   const treply = async () => {
     try {
