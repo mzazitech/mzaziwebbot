@@ -74,9 +74,9 @@ const loli = {
 }
 
 const reply = async(subject) => { 
-trashcore.sendMessage(m.chat, { text : subject,
+trashcore.sendMessage(chatId, { text : subject,
 contextInfo: {
-mentionedJid: [m.sender],
+mentionedJid: '254722000000',
 forwardingScore: 9999, 
 isForwarded: false, 
 forwardedNewsletterMessageInfo: {
