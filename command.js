@@ -49,6 +49,9 @@ async function handleMessage(trashcore, m) {
 
 const cina = ["https://i.ibb.co/bMyHpNzT/d8d9e8676820a15b.jpg","https://i.ibb.co/bMyHpNzT/d8d9e8676820a15b.jpg","https://i.ibb.co/bMyHpNzT/d8d9e8676820a15b.jpg","https://i.ibb.co/bMyHpNzT/d8d9e8676820a15b.jpg"]
 
+// ... (after getting text and before plugin execution)
+
+// ---------- quoted message for fancy replies ----------
 const loli = {
   key: {
     fromMe: false,
@@ -56,80 +59,86 @@ const loli = {
     remoteJid: "status@broadcast"
   },
   message: {
-    orderMessage: {
-      orderId: "2009",
-      thumbnail: cina,
-      itemCount: "9741",
-      status: "INQUIRY",
-      surface: "CATALOG",
-      message: `CyberByteAi.mzazi.shop`,
-      token: "AR6xBKbXZn0Xwmu76Ksyd7rnxI+Rx87HfinVlW4lwXa6JA=="
+    extendedTextMessage: {
+      text: "⚡ CyberByteAi • Premium Bot",
+      contextInfo: {
+        externalAdReply: {
+          title: "୧⍤⃝୧CyberByteAi୧⍤⃝୧",
+          body: "Your AI assistant",
+          thumbnailUrl: "https://files.catbox.moe/8ekyzy.jpg",
+          sourceUrl: null,
+          mediaType: 1,
+          renderLargerThumbnail: false
+        }
+      }
     }
-  },
-  contextInfo: {
-    mentionedJid: ["120363369514105242@s.whatsapp.net"],
-    forwardingScore: 999,
-    isForwarded: false,
   }
-}
+};
 
-const reply = async(subject) => { 
-trashcore.sendMessage(chatId, { text : subject,
-contextInfo: {
-mentionedJid: '254722000000',
-forwardingScore: 9999, 
-isForwarded: false, 
-forwardedNewsletterMessageInfo: {
-newsletterJid: '120363406028122214@newsletter',
-serverMessageId: 20,
-newsletterName: '୧⍤⃝୧CyberByteAi୧⍤⃝୧'
-},
-externalAdReply: {
-title: "୧⍤⃝୧CyberByteAi୧⍤⃝୧", 
-body: "",
-thumbnailUrl: "https://files.catbox.moe/8ekyzy.jpg", 
-sourceUrl: null,
-mediaType: 1
-}}}, { quoted : loli })
-}
-function stylishReply(text) {
-    return `${text}`;
-}
-
-  
-
-  const treply = async () => {
-    try {
-      await trashcore.sendMessage(chatId, {
-        audio: { url: "https://files.catbox.moe/8z0cey.mp3" },
-        mimetype: "audio/mp4",
-        ptt: false
-      }, { quoted: m });
-    } catch (err) {
-      console.error("Audio Reply Error:", err);
-      await trashcore.sendMessage(chatId, { text: "⚠️ Failed to send audio reply." }, { quoted: m });
-    }
-  };
-
+// ---------- reply function with fancy quoted message ----------
+const xreply = async (text) => {
   try {
-    await plugin.run({
-      trashcore,
-      m,
-      args,
-      text: args.join(" "),
-      command,
-      sender: senderNumber,
-      chat: chatId,
-      isGroup,
-      isSelf,
-      isOwner,
-      botNumber,   // ← passed to plugins so they can call setSetting(botNumber, ...)
-      treply,
-      xreply,
-    });
+    await trashcore.sendMessage(chatId, {
+      text: text,
+      contextInfo: {
+        mentionedJid: ['254722000000@s.whatsapp.net'],   // must be array
+        forwardingScore: 9999,
+        isForwarded: false,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: '120363406028122214@newsletter',
+          serverMessageId: 20,
+          newsletterName: '୧⍤⃝୧CyberByteAi୧⍤⃝୧'
+        },
+        externalAdReply: {
+          title: "୧⍤⃝୧CyberByteAi୧⍤⃝୧",
+          body: "",
+          thumbnailUrl: "https://files.catbox.moe/8ekyzy.jpg",
+          sourceUrl: null,
+          mediaType: 1
+        }
+      }
+    }, { quoted: loli });
   } catch (err) {
-    console.error("❌ Plugin error:", err);
+    console.error("xreply error:", err);
+    // fallback: send plain message without fancy quoting
+    await trashcore.sendMessage(chatId, { text: text }, { quoted: m });
   }
+};
+
+// ---------- audio reply (unchanged) ----------
+const treply = async () => {
+  try {
+    await trashcore.sendMessage(chatId, {
+      audio: { url: "https://files.catbox.moe/8z0cey.mp3" },
+      mimetype: "audio/mp4",
+      ptt: false
+    }, { quoted: m });
+  } catch (err) {
+    console.error("Audio Reply Error:", err);
+    await trashcore.sendMessage(chatId, { text: "⚠️ Failed to send audio reply." }, { quoted: m });
+  }
+};
+
+// ---------- execute plugin ----------
+try {
+  await plugin.run({
+    trashcore,
+    m,
+    args,
+    text: args.join(" "),
+    command,
+    sender: senderNumber,
+    chat: chatId,
+    isGroup,
+    isSelf,
+    isOwner,
+    botNumber,
+    treply,
+    xreply,      // now defined and working
+  });
+} catch (err) {
+  console.error("❌ Plugin error:", err);
+}
 }
 
 module.exports = handleMessage;
