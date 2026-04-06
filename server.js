@@ -3,8 +3,8 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const cors = require('cors');
-const makeWASocket = require('@whiskeysockets/baileys').default;
-const { useMultiFileAuthState } = require('@whiskeysockets/baileys');
+const makeWASocket = require('@trashcore/baileys').default;
+const { useMultiFileAuthState } = require('@trashcore/baileys');
 const QRCode = require('qrcode');
 
 const app = express();
