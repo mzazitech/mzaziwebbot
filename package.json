@@ -1,10 +1,10 @@
 {
-  "name": "trashbot",
+  "name": "Mzazi Tech Inc. Botz 2026",
   "version": "5.0.0",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "^6.7.8",
